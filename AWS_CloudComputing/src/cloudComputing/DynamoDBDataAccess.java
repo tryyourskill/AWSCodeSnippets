@@ -41,7 +41,7 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 
 public class DynamoDBDataAccess {
-	BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAI2RJ6PBMW2VYKAOA", "vxUT7QFNj0Yioz7KMvuKMxYXXQNpjrGOyhx1qbxQ");
+	BasicAWSCredentials credentials = new BasicAWSCredentials("XXXXXXXXXXXXXXXX", "XXXXXXXXXXXXXXXXXX");
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
 	
 	DynamoDB dynamoDB = new DynamoDB(client);
