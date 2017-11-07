@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/surajit/Google Drive/Hadoop_Spark/AWS_Code/AWS_S3/aws-java-sdk-bundle-1.11.85.jar"/>
+	<classpathentry kind="lib" path="E:/AmazonHiveJDBC_1.0.4.1004.zip"/>
+	<classpathentry kind="lib" path="C:/Users/surajit/Google Drive/Hadoop_Spark/AWS_Code/AWS_S3/jackson-all-1.9.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/surajit/Google Drive/Hadoop_Spark/AWS_Code/AWS_S3/json-simple-1.1.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
