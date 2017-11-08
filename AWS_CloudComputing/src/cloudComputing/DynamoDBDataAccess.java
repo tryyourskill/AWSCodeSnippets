@@ -40,8 +40,10 @@ import com.amazonaws.services.dynamodbv2.model.ProjectionType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 
+import credential.AWSCredential;
+
 public class DynamoDBDataAccess {
-	BasicAWSCredentials credentials = new BasicAWSCredentials("XXXXXXXXXXXXXXXX", "XXXXXXXXXXXXXXXXXX");
+	BasicAWSCredentials credentials = new AWSCredential().getCredential();
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
 	
 	DynamoDB dynamoDB = new DynamoDB(client);
@@ -168,13 +170,14 @@ public class DynamoDBDataAccess {
 		}
 	}
 	
-	public String[] getFieldDynamoDB(String tableName, String primaryKey, String primaryKeyValue, String projectionColumns){
+	public String[] getMultipleFieldsDynamoDB(String tableName, String primaryKey, String primaryKeyValue, String projectionColumns){
 		Table table = dynamoDB.getTable(tableName);
 		JSONParser jsonParser = new JSONParser();
 		
 		String[] columnsArray = projectionColumns.split(",");
 		NameMap reservedKeyMap = new NameMap();
 		String columns = null;
+		String tempColumns;
 		int arrayIndex = 0;
 		String[] outPutArray = new String[columnsArray.length];
 		/*The below for loop is to avoid reserved keyword exception , this loop will add # before every column to let dynamoDB know that it's a reserved keyword and
@@ -182,26 +185,89 @@ public class DynamoDBDataAccess {
 		 If you are 100% sure you will not have any reserved keyword then skip this part and simple pass the input string projectionColumns
 		 */
 		for (int i = 0; i < columnsArray.length; i++) {
+			tempColumns = columnsArray[i].trim();
 			if(i ==0){
-				columns = "#" + columnsArray[i];
+				columns = "#" + tempColumns;
 			}
 			else {
-				columns += ",#" + columnsArray[i];
+				columns += ",#" + tempColumns;
 			}
-			reservedKeyMap.put("#" + columnsArray[i], columnsArray[i]);
+			reservedKeyMap.put("#" + tempColumns, tempColumns);
 		}
 		
 		GetItemSpec getSpec = new GetItemSpec().withPrimaryKey(primaryKey, primaryKeyValue).withProjectionExpression(columns).withConsistentRead(true);
 		getSpec.withNameMap(reservedKeyMap);
-		
+		System.out.println("complete");
 		Item item = table.getItem(getSpec);
+		System.out.println(item);
 		try {
 			Object obj = jsonParser.parse(item.toJSONPretty());
 			JSONObject jObject = (JSONObject) obj;
 			for (String columnKey : columnsArray) {
-				outPutArray[arrayIndex] = jObject.get(columnKey).toString();
-				System.out.println(outPutArray[arrayIndex]);
-				arrayIndex++;
+				columnKey = columnKey.trim();
+				if(jObject.containsKey(columnKey)){
+					outPutArray[arrayIndex] = jObject.get(columnKey).toString();
+					System.out.println(outPutArray[arrayIndex]);
+					arrayIndex++;
+				} else {
+					outPutArray[arrayIndex] = null;
+					System.out.println(outPutArray[arrayIndex]);
+				}
+				
+			}
+			
+		} catch (ParseException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return outPutArray;
+	}
+	
+	
+	public String[] getMultipleFieldsDynamoDB(String tableName, String hashKey, String hashKeyValue,String sortKey, String sortKeyValue, String projectionColumns){
+		Table table = dynamoDB.getTable(tableName);
+		JSONParser jsonParser = new JSONParser();
+		
+		String[] columnsArray = projectionColumns.split(",");
+		NameMap reservedKeyMap = new NameMap();
+		String columns = null;
+		String tempColumns;
+		int arrayIndex = 0;
+		String[] outPutArray = new String[columnsArray.length];
+		/*The below for loop is to avoid reserved keyword exception , this loop will add # before every column to let dynamoDB know that it's a reserved keyword and
+		 value of them will be in reservedKeyMap
+		 If you are 100% sure you will not have any reserved keyword then skip this part and simple pass the input string projectionColumns
+		 */
+		for (int i = 0; i < columnsArray.length; i++) {
+			tempColumns = columnsArray[i].trim();
+			if(i ==0){
+				columns = "#" + tempColumns;
+			}
+			else {
+				columns += ",#" + tempColumns;
+			}
+			reservedKeyMap.put("#" + tempColumns, tempColumns);
+		}
+		
+		GetItemSpec getSpec = new GetItemSpec().withPrimaryKey(hashKey, hashKeyValue, sortKey, sortKeyValue).withProjectionExpression(columns).withConsistentRead(true);
+		getSpec.withNameMap(reservedKeyMap);
+		System.out.println("complete");
+		Item item = table.getItem(getSpec);
+		System.out.println(item);
+		try {
+			Object obj = jsonParser.parse(item.toJSONPretty());
+			JSONObject jObject = (JSONObject) obj;
+			for (String columnKey : columnsArray) {
+				columnKey = columnKey.trim();
+				if(jObject.containsKey(columnKey)){
+					outPutArray[arrayIndex] = jObject.get(columnKey).toString();
+					System.out.println(outPutArray[arrayIndex]);
+					arrayIndex++;
+				} else {
+					outPutArray[arrayIndex] = null;
+					System.out.println(outPutArray[arrayIndex]);
+				}
+				
 			}
 			
 		} catch (ParseException e) {

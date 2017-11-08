@@ -20,6 +20,8 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
 
+import credential.AWSCredential;
+
 public class S3Manager {
 	
 /*	 File configFile = new File(System.getProperty("user.home"), ".aws/credentials");
@@ -27,7 +29,7 @@ public class S3Manager {
 	        new ProfilesConfigFile(configFile), "default");
 	    AmazonS3 s3client = AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider()).withRegion(Regions.US_EAST_1).build();*/
 	    
-		BasicAWSCredentials credentials = new BasicAWSCredentials("XXXXXXXXXXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXX");
+		BasicAWSCredentials credentials = new AWSCredential().getCredential();
 		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).
 				withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
 	    

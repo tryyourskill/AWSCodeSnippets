@@ -17,10 +17,11 @@ import com.amazonaws.services.sqs.model.SendMessageBatchRequest;
 import com.amazonaws.services.sqs.model.SendMessageBatchRequestEntry;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 
+import credential.AWSCredential;
+
 public class SQSManager {
 
-	BasicAWSCredentials credentials = new BasicAWSCredentials("XXXXXXXXXXXXXXXXXXXXX",
-			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	BasicAWSCredentials credentials = new AWSCredential().getCredential();
 
 	AmazonSQS SQSClient = AmazonSQSClientBuilder.standard().withRegion(Regions.US_EAST_1)
 			.withCredentials(new AWSStaticCredentialsProvider(credentials)).build(); 
