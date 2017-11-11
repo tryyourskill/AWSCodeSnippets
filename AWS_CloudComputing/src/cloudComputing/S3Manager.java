@@ -2,22 +2,30 @@ package cloudComputing;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.CopyObjectResult;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.util.IOUtils;
 
 import credential.AWSCredential;
@@ -213,5 +221,50 @@ public class S3Manager {
 	}
 
 	//Create a method too generate a pre-signed url
-}
 
+
+	public void S3MultiPartUpload(String filePath, String bucketName, String objectKey){
+		System.out.println("Method Invoked !!");
+		File inputFile = new File(filePath);
+		List<PartETag> partETags =  new ArrayList<PartETag>();
+		
+		//Initialize the Multipart upload.
+		System.out.println("Initializing the multipart upload");
+		InitiateMultipartUploadResult initRequest = s3Client.initiateMultipartUpload(new com.amazonaws.services.s3.model.InitiateMultipartUploadRequest(bucketName, objectKey));
+		
+		long fileSize = inputFile.length();
+		
+		//Part size 5 MB
+		long partSize = 5*1024*1024;
+		try {
+		long filePosition = 0;
+		int partNumber = 1;
+		while(filePosition < fileSize){
+			partSize = Math.min(partSize, (fileSize - filePosition));
+			System.out.println("Multi part upload requesting " + partNumber);
+			//Multipart upload request
+			UploadPartRequest partUploadRequest = new UploadPartRequest().
+					withBucketName(bucketName).withKey(objectKey).
+					withFile(inputFile).withFileOffset(filePosition).
+					withPartSize(partSize).withPartNumber(partNumber).
+					withUploadId(initRequest.getUploadId());
+			//Add the ETag to ArrayList which will further use to complete the Multipart upload.
+			partETags.add(s3Client.uploadPart(partUploadRequest).getPartETag());
+			
+			filePosition += partSize;
+			partNumber++;
+		}
+		System.out.println("Completing multipart request");
+		CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(bucketName, objectKey, initRequest.getUploadId(), partETags);
+		
+		s3Client.completeMultipartUpload(completeRequest);
+		} catch (Exception e) {
+			s3Client.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, objectKey, initRequest.getUploadId()));
+		}
+	}
+		
+}		
+		
+		
+		
+	
