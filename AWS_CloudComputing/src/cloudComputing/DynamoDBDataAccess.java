@@ -387,27 +387,26 @@ public class DynamoDBDataAccess {
 		return false;
 	}
 	
-	public JSONObject getItemDynamoDB(String tableName, String primaryKey,
-			String primaryKeyValue) {
-		Table index = dynamoDB.getTable(tableName);
-
-		QuerySpec querySpec = new QuerySpec().withKeyConditionExpression("#primaryKey = :value1")
-				.withNameMap(new NameMap().with("#primaryKey", primaryKey))
-				.withValueMap(new ValueMap().withString(":value1", primaryKeyValue));
+	public void getItemDynamoDB(String tableName, String primaryKey,
+		String primaryKeyValue) {
+	Table index = dynamoDB.getTable(tableName);
+	QuerySpec querySpec = new QuerySpec().withKeyConditionExpression("#primaryKey = :value1")
+			.withNameMap(new NameMap().with("#primaryKey", primaryKey))
+			.withValueMap(new ValueMap().withString(":value1", primaryKeyValue));
 		
-		ItemCollection<QueryOutcome> items = index.query(querySpec);
-		Iterator<Item> itemIterator = items.iterator();
-
-				try {
-					Object obj = jsonParser.parse(itemIterator.next().toJSONPretty());
-					JSONObject jsonObject = (JSONObject) obj;
-					return jsonObject;
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				}
-				
+	ItemCollection<QueryOutcome> items = index.query(querySpec);
+	Iterator<Item> itemIterator = items.iterator();
+	while (itemIterator.hasNext()) {
+			try {
+				Object obj = jsonParser.parse(itemIterator.next().toJSONPretty());
+				JSONObject jsonObject = (JSONObject) obj;
+				System.out.println(jsonObject);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+					
+			}
+	}		
 	}
 	
 	@SuppressWarnings("unchecked")
